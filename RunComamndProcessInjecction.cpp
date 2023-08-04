@@ -61,28 +61,13 @@ int main(int argc, char** argv) {
 	char* pid_c = argv[1];
 	DWORD PID_TO_IMPERSONATE = atoi(pid_c);
 
-	// Open the target process with full access rights.
+	// Step 1: Open the target process with full access rights.
 	HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, PID_TO_IMPERSONATE);
 	if (hProcess == NULL)
 	{
 		std::cout << "[-] Failed Open Process, error:  " << GetLastError() << std::endl;
 		CloseHandle(hProcess);
 		return 1;
-	}
-
-	// Open the current process token with all access rights.
-	HANDLE hToken;
-	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &hToken))
-	{
-		CloseHandle(hToken);
-		return 1;
-	}
-
-	// Set the required privilege (SeDebugPrivilege) for the current process.
-	const wchar_t* privs[] = { L"SeDebugPrivilege" };
-	if (SetPrivilege(hToken, L"SeDebugPrivilege", TRUE)) //(LPCTSTR)privs
-	{
-		// The privilege was successfully enabled.
 	}
 
 	// Step 2: Allocate memory in the target process.
@@ -126,8 +111,6 @@ int main(int argc, char** argv) {
 	// All operations are completed, close handles.
 	if (hProcess != NULL)
 		CloseHandle(hProcess);
-	if (hToken != NULL)
-		CloseHandle(hToken);
 
 	Sleep(3000);
 
