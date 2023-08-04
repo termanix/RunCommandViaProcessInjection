@@ -61,10 +61,6 @@ int main(int argc, char** argv) {
 	char* pid_c = argv[1];
 	DWORD PID_TO_IMPERSONATE = atoi(pid_c);
 
-	// Get the current process token handle.
-	HANDLE currentTokenHandle = NULL;
-	BOOL getCurrentToken = OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &currentTokenHandle);
-
 	// Open the target process with full access rights.
 	HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, PID_TO_IMPERSONATE);
 	if (hProcess == NULL)
@@ -84,7 +80,7 @@ int main(int argc, char** argv) {
 
 	// Set the required privilege (SeDebugPrivilege) for the current process.
 	const wchar_t* privs[] = { L"SeDebugPrivilege" };
-	if (SetPrivilege(currentTokenHandle, L"SeDebugPrivilege", TRUE)) //(LPCTSTR)privs
+	if (SetPrivilege(hToken, L"SeDebugPrivilege", TRUE)) //(LPCTSTR)privs
 	{
 		// The privilege was successfully enabled.
 	}
@@ -132,8 +128,6 @@ int main(int argc, char** argv) {
 		CloseHandle(hProcess);
 	if (hToken != NULL)
 		CloseHandle(hToken);
-	if (currentTokenHandle != NULL)
-		CloseHandle(currentTokenHandle);
 
 	Sleep(3000);
 
