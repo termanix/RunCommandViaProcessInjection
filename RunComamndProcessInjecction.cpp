@@ -1,54 +1,5 @@
 #include <windows.h>
 #include <iostream>
-#include <Lmcons.h>
-#include <fstream>
-#include <tlhelp32.h>
-#define _CRT_SECURE_NO_WARNINGS
-
-// Function to enable or disable a specified privilege for a given access token.
-BOOL SetPrivilege(
-	HANDLE hToken,          // access token handle
-	LPCTSTR lpszPrivilege,  // name of privilege to enable/disable
-	BOOL bEnablePrivilege   // to enable or disable privilege
-)
-{
-	// Data structures required for adjusting privileges.
-	TOKEN_PRIVILEGES tp;
-	LUID luid;
-	if (!LookupPrivilegeValue(
-		NULL,
-		lpszPrivilege,
-		&luid))
-	{
-		printf("[-] LookupPrivilegeValue error: %u\n", GetLastError());
-		return FALSE;
-	}
-	tp.PrivilegeCount = 1;
-	tp.Privileges[0].Luid = luid;
-	if (bEnablePrivilege)
-		tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-	else
-		tp.Privileges[0].Attributes = 0;
-
-	// Enable the privilege or disable all privileges.
-	if (!AdjustTokenPrivileges(
-		hToken,
-		FALSE,
-		&tp,
-		sizeof(TOKEN_PRIVILEGES),
-		(PTOKEN_PRIVILEGES)NULL,
-		(PDWORD)NULL))
-	{
-		printf("[-] AdjustTokenPrivileges error: %u\n", GetLastError());
-		return FALSE;
-	}
-	if (GetLastError() == ERROR_NOT_ALL_ASSIGNED)
-	{
-		printf("[-] The token does not have the specified privilege. \n");
-		return FALSE;
-	}
-	return TRUE;
-}
 
 int main(int argc, char** argv) {
 
